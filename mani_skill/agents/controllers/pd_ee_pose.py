@@ -51,9 +51,9 @@ class PDEEPosController(PDJointPosController):
             root_link = sapien_utils.get_obj_by_name(
                 self.articulation.get_links(), self.config.root_link_name
             )
-            assert self.root_link is not None and isinstance(
+            assert isinstance(
                 root_link, Link
-            ), f"Root link {self.config.root_link_name} matches more than one link or was not found"
+            ), f"Root link {self.config.root_link_name} was not found or is not a Link"
             self.root_link = root_link
         else:
             self.root_link = self.articulation.root

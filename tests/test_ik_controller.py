@@ -10,6 +10,31 @@ from mani_skill.envs.sapien_env import BaseEnv
 from mani_skill.utils import common
 
 
+def test_fetch_pd_ee_delta_pose_named_root_cpu():
+    env = gym.make(
+        "PushCube-v1",
+        robot_uids="fetch",
+        control_mode="pd_ee_delta_pose",
+        num_envs=1,
+        obs_mode="state",
+        reward_mode="none",
+        sim_backend="physx_cpu",
+        render_backend="none",
+        robot_init_qpos_noise=0.0,
+    )
+    try:
+        env.reset(seed=0)
+        arm = env.unwrapped.agent.controller.controllers["arm"]
+        assert arm.config.root_link_name == "torso_lift_link"
+        assert arm.root_link.name == "torso_lift_link"
+        torch.testing.assert_close(
+            arm.ee_pose_at_base.raw_pose,
+            (arm.root_link.pose.inv() * arm.ee_link.pose).raw_pose,
+        )
+    finally:
+        env.close()
+
+
 @pytest.mark.gpu_sim
 @pytest.mark.parametrize("control_mode", ["pd_ee_delta_pose", "pd_ee_target_delta_pose", "pd_ee_delta_pos", "pd_ee_target_delta_pos"])
 def test_pd_ee_delta_controller(control_mode):
